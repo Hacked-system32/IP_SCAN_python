@@ -1,0 +1,21 @@
+import psutil
+import requests
+
+def gather_network_connections():
+    connections = psutil.net_connections()
+    ips = set([conn.raddr.ip for conn in connections if conn.raddr])
+    return ips
+
+def check_ip_threat(ip):
+    abuseipdb_api_key = 'your_abuseipdb_api_key'
+    url = 'https://api.abuseipdb.com/api/v2/check'
+    headers = {'Key': abuseipdb_api_key, 'Accept': 'application/json'}
+    params = {'ipAddress': ip, 'maxAgeInDays': '90'}
+    response = requests.get(url, headers=headers, params=params)
+    return response.json()
+
+if __name__ == '__main__':
+    ips = gather_network_connections()
+    for ip in ips:
+        result = check_ip_threat(ip)
+        print(f"IP: {ip} - Reports: {result['data']['totalReports']}")
